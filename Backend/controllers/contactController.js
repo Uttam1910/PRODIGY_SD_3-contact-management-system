@@ -1,20 +1,34 @@
 const Contact = require('../models/ContactModel');
 
-// Add a new contact
+// Add a new contact with duplicate check
 exports.createContact = async (req, res) => {
   const { name, phone, email } = req.body;
 
   try {
+    // Check if a contact with the same phone or email already exists
+    const existingContact = await Contact.findOne({ 
+      $or: [{ phone }, { email }] 
+    });
+
+    if (existingContact) {
+      return res.status(400).json({ 
+        message: 'Contact with the same phone or email already exists' 
+      });
+    }
+
+    // Create a new contact if no duplicate is found
     const newContact = new Contact({ name, phone, email });
     await newContact.save();
     res.status(201).json({
-      message: "Contact created successfully",
+      message: 'Contact created successfully',
       contact: newContact
     });
+
   } catch (error) {
     res.status(500).json({ message: 'Error creating contact', error: error.message });
   }
 };
+
 
 // Get all contacts with pagination and exclude soft-deleted ones
 exports.getContacts = async (req, res) => {
@@ -89,23 +103,36 @@ exports.deleteContact = async (req, res) => {
 };
 
 // Search contacts by name or email
+
+// Search contacts by name or email.
 exports.searchContacts = async (req, res) => {
   const { name, email } = req.query;
 
   try {
-    const contacts = await Contact.find({
-      deleted: false,
-      $or: [
-        { name: { $regex: name, $options: 'i' } },
-        { email: { $regex: email, $options: 'i' } }
-      ]
-    });
+    const query = {
+      $or: []
+    };
+
+    if (name) {
+      query.$or.push({ name: { $regex: name, $options: 'i' } });
+    }
+
+    if (email) {
+      query.$or.push({ email: { $regex: email, $options: 'i' } });
+    }
+
+    const contacts = await Contact.find(query);
 
     if (contacts.length === 0) {
       return res.status(404).json({ message: 'No contacts found' });
     }
-    res.status(200).json(contacts);
+    
+    res.status(200).json({
+      message: "Contacts found successfully",
+      contacts: contacts
+    });
   } catch (error) {
     res.status(500).json({ message: 'Error searching contacts', error: error.message });
   }
 };
+
