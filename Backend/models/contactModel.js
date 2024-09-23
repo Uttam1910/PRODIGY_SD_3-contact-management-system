@@ -31,6 +31,7 @@ const contactSchema = new mongoose.Schema({
       message: props => `${props.value} is not a valid email address!`
     },
   },
+  deleted: { type: Boolean, default: false }  // Add a soft delete flag
 }, { timestamps: true });
 
 module.exports = mongoose.model('Contact', contactSchema);
