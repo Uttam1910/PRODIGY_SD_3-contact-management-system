@@ -2,11 +2,17 @@ const contactForm = document.getElementById('contactForm');
 const contactList = document.getElementById('contactList');
 const searchButton = document.getElementById('searchButton');
 const searchInput = document.getElementById('search');
+const prevButton = document.getElementById('prevButton'); // New: Previous button
+const nextButton = document.getElementById('nextButton'); // New: Next button
+const pageInfo = document.getElementById('pageInfo'); // New: Page info display
+
+let currentPage = 1; // New: Current page tracker
+const limit = 10; // New: Limit of contacts per page
 
 // Function to fetch and display all contacts
 const fetchContacts = async () => {
     try {
-        const response = await fetch('http://localhost:5000/api/contacts');
+        const response = await fetch(`http://localhost:5000/api/contacts?page=${currentPage}&limit=${limit}`);
         if (!response.ok) throw new Error('Failed to fetch contacts');
         
         const data = await response.json();
@@ -21,11 +27,20 @@ const fetchContacts = async () => {
 
         contactList.innerHTML = ''; // Clear the current list
         contacts.forEach(contact => addContactToList(contact));
+        
+        // Update pagination info
+        updatePagination(data.totalPages); // New: Update total pages in the UI
     } catch (error) {
         console.error('Error fetching contacts:', error);
     }
 };
 
+// Update pagination information
+function updatePagination(totalPages) {
+    pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+    prevButton.disabled = currentPage === 1; // Disable previous button if on the first page
+    nextButton.disabled = currentPage === totalPages; // Disable next button if on the last page
+}
 
 // Add contact form submission event listener
 contactForm.addEventListener('submit', async (e) => {
@@ -71,8 +86,6 @@ function addContactToList(contact) {
     contactList.appendChild(li);
 }
 
-
-
 // Add search button event listener
 searchButton.addEventListener('click', async () => {
     const searchValue = searchInput.value;
@@ -99,13 +112,18 @@ searchButton.addEventListener('click', async () => {
     }
 });
 
+// Pagination Controls
+prevButton.addEventListener('click', () => {
+    if (currentPage > 1) {
+        currentPage--;
+        fetchContacts(); // Fetch contacts for the previous page
+    }
+});
 
-// Function to add contact to the list
-function addContactToList(contact) {
-    const li = document.createElement('li');
-    li.textContent = `${contact.name} - ${contact.phone} - ${contact.email}`;
-    contactList.appendChild(li);
-}
+nextButton.addEventListener('click', () => {
+    currentPage++;
+    fetchContacts(); // Fetch contacts for the next page
+});
 
 // Initial fetch of contacts when the page loads
 fetchContacts();
