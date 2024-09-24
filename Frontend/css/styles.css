@@ -1,0 +1,115 @@
+/* General styles */
+body {
+    font-family: 'Roboto', Arial, sans-serif;
+    background-color: #eef2f7;
+    margin: 0;
+    padding: 20px;
+    color: #333;
+}
+
+/* Container for form and list */
+.container {
+    max-width: 700px;
+    margin: 40px auto;
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease-in-out;
+}
+
+/* Hover effect for container */
+.container:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+/* Header styles */
+h1 {
+    text-align: center;
+    font-size: 2em;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* Form styles */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Input fields */
+input {
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1em;
+    transition: border-color 0.3s ease;
+}
+
+/* Focused input field styles */
+input:focus {
+    outline: none;
+    border-color: #28a745;
+    box-shadow: 0 0 5px rgba(40, 167, 69, 0.3);
+}
+
+/* Submit button */
+button {
+    padding: 12px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+/* Button hover effect */
+button:hover {
+    background-color: #218838;
+}
+
+/* Contact list styles */
+#contactList {
+    list-style-type: none;
+    padding: 0;
+    margin-top: 20px;
+}
+
+/* Contact list items */
+#contactList li {
+    background-color: #f8f9fa;
+    margin: 10px 0;
+    padding: 12px 16px;
+    border-radius: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.3s ease;
+}
+
+/* Hover effect for list items */
+#contactList li:hover {
+    background-color: #e9ecef;
+}
+
+/* Responsive design */
+@media (max-width: 600px) {
+    .container {
+        padding: 20px;
+    }
+
+    h1 {
+        font-size: 1.5em;
+    }
+
+    button {
+        font-size: 0.9em;
+    }
+
+    input {
+        font-size: 0.9em;
+    }
+}
