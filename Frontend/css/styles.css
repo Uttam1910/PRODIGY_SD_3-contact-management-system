@@ -160,4 +160,12 @@ button:hover {
     background-color: #ccc; /* Gray for disabled button */
     cursor: not-allowed;
 }
-    
+.edit-btn {
+    margin-left: 10px;
+    background-color: #007bff; /* Bootstrap primary color */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 5px 10px;
+}
