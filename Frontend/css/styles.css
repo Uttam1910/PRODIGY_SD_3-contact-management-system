@@ -1,10 +1,19 @@
+/* Global Styles */
 body {
     font-family: 'Arial', sans-serif;
     margin: 0;
     padding: 0;
     background-color: #f4f4f4;
+    color: #333;
 }
 
+h1 {
+    text-align: center;
+    margin-top: 20px;
+    color: #333;
+}
+
+/* Navbar Styles */
 .navbar {
     background-color: #333;
     padding: 1rem;
@@ -14,6 +23,8 @@ body {
     list-style: none;
     display: flex;
     justify-content: space-around;
+    padding: 0;
+    margin: 0;
 }
 
 .navbar ul li {
@@ -24,58 +35,162 @@ body {
     color: white;
     text-decoration: none;
     padding: 10px;
+    transition: background-color 0.3s ease;
 }
 
 .navbar ul li a:hover {
     background-color: #575757;
 }
 
+
+/* Form Container */
 .container {
-    padding: 2rem;
+    max-width: 600px;
+    margin: 30px auto;
+    padding: 20px;
+    background-color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
 }
 
 h1 {
     color: #333;
 }
 
-ul.contact-list {
-    list-style-type: none;
-    padding: 0;
-}
-
-ul.contact-list li {
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
+/* Form Styles */
+.contact-form {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-ul.contact-list li button {
-    margin-left: 10px;
+    flex-direction: column;
 }
 
 .form-group {
-    margin-bottom: 15px;
+    margin-bottom: 20px;
 }
 
 .form-group label {
+    font-size: 1.2rem;
+    color: #333;
     display: block;
+    margin-bottom: 8px;
 }
 
 .form-group input {
-    padding: 10px;
     width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
 }
 
+.form-group input:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+}
+
+/* Button Styles */
 .btn {
-    padding: 10px 15px;
-    background-color: #333;
+    padding: 12px 15px;
+    background-color: #3498db;
     color: white;
     border: none;
+    border-radius: 5px;
     cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
 }
 
 .btn:hover {
-    background-color: #575757;
+    background-color: #2980b9;
+}
+
+
+/* Contact List Styled as Table */
+#contactList {
+    width: 100%;
+    max-width: 800px;
+    margin: 20px auto;
+    background-color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    overflow: hidden;
+    border-collapse: collapse;
+}
+
+#contactList li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid #ddd;
+    list-style: none;
+}
+
+#contactList li:last-child {
+    border-bottom: none;
+}
+
+#contactList li:hover {
+    background-color: #f9f9f9;
+}
+
+#contactList li div {
+    flex: 1;
+    padding: 0 10px;
+}
+
+#contactList li div:nth-child(2) {
+    text-align: center;
+}
+
+#contactList li div:nth-child(3) {
+    text-align: right;
+}
+
+#contactList button {
+    padding: 5px 10px;
+    border: none;
+    background-color: #3498db;
+    color: white;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#contactList button:hover {
+    background-color: #2980b9;
+}
+
+/* Pagination Styles */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.pagination button {
+    padding: 10px 15px;
+    border: none;
+    background-color: #3498db;
+    color: white;
+    margin: 0 5px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.pagination button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.pagination button:hover:enabled {
+    background-color: #2980b9;
+}
+
+#pageInfo {
+    margin: 0 15px;
+    font-weight: bold;
+    color: #333;
 }
