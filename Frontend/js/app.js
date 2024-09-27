@@ -1,12 +1,13 @@
-// Ensure the DOM is fully loaded before running the script
 document.addEventListener('DOMContentLoaded', function () {
     const contactForm = document.getElementById('contactForm');
     const contactList = document.getElementById('contactList');
+    const recycleBinList = document.getElementById('recycleBinList'); // Recycle bin element
     const searchButton = document.getElementById('searchButton');
     const searchInput = document.getElementById('search');
     const prevButton = document.getElementById('prevButton');
     const nextButton = document.getElementById('nextButton');
     const pageInfo = document.getElementById('pageInfo');
+    const viewRecycleBinButton = document.getElementById('viewRecycleBin'); // View Recycle Bin Button
 
     let currentPage = 1;
     const limit = 10;
@@ -21,12 +22,12 @@ document.addEventListener('DOMContentLoaded', function () {
             const data = await response.json();
             const contacts = data.contacts;
 
-            if (!Array.isArray(contacts)) {
-                throw new Error('Expected an array of contacts');
-            }
-
             contactList.innerHTML = '';
-            contacts.forEach(contact => addContactToList(contact));
+            contacts.forEach(contact => {
+                if (!contact.deleted) { // Only show non-deleted contacts in the main list
+                    addContactToList(contact);
+                }
+            });
 
             updatePagination(data.totalPages);
         } catch (error) {
@@ -42,23 +43,117 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Add contact to list
     function addContactToList(contact) {
-        const contactList = document.getElementById('contactList');
-        
-        if (!contactList) {
-            console.error('Error: contactList element not found.');
-            return;
-        }
-
         const li = document.createElement('li');
         li.textContent = `${contact.name} - ${contact.phone} - ${contact.email}`;
-
+        
         const editButton = document.createElement('button');
         editButton.textContent = 'Edit';
         editButton.onclick = () => editContact(contact);
 
+        const softDeleteButton = document.createElement('button');
+        softDeleteButton.textContent = 'Soft Delete';
+        softDeleteButton.onclick = () => softDeleteContact(contact._id);
+
+        const hardDeleteButton = document.createElement('button');
+        hardDeleteButton.textContent = 'Hard Delete';
+        hardDeleteButton.onclick = () => hardDeleteContact(contact._id);
+
         li.appendChild(editButton);
+        li.appendChild(softDeleteButton);
+        li.appendChild(hardDeleteButton);
         contactList.appendChild(li);
     }
+
+    // Soft delete contact
+    const softDeleteContact = async (id) => {
+        try {
+            const response = await fetch(`http://localhost:5000/api/contacts/${id}`, {
+                method: 'DELETE'
+            });
+            if (!response.ok) {
+                throw new Error('Failed to soft delete contact');
+            }
+            fetchContacts(); // Refresh contact list after soft delete
+            alert('Contact moved to recycle bin');
+        } catch (error) {
+            console.error('Error soft deleting contact:', error);
+            alert(error.message);
+        }
+    };
+
+    // Hard delete contact
+    const hardDeleteContact = async (id) => {
+        try {
+            const response = await fetch(`http://localhost:5000/api/contacts/harddelete/${id}`, {
+                method: 'DELETE'
+            });
+            if (!response.ok) {
+                throw new Error('Failed to hard delete contact');
+            }
+            fetchContacts(); // Refresh contact list after hard delete
+            fetchRecycleBinContacts(); // Refresh recycle bin list
+            alert('Contact deleted permanently');
+        } catch (error) {
+            console.error('Error hard deleting contact:', error);
+            alert(error.message);
+        }
+    };
+
+    // Fetch recycle bin contacts
+    const fetchRecycleBinContacts = async () => {
+        try {
+            const response = await fetch('http://localhost:5000/api/contacts/recyclebin');
+            if (!response.ok) throw new Error('Failed to fetch recycle bin contacts');
+
+            const data = await response.json();
+            const contacts = data.contacts;
+
+            recycleBinList.innerHTML = '';
+            contacts.forEach(contact => {
+                if (contact.deleted) { // Only show deleted contacts in the recycle bin
+                    addRecycleBinContactToList(contact);
+                }
+            });
+        } catch (error) {
+            console.error('Error fetching recycle bin contacts:', error);
+        }
+    };
+
+    // Add recycle bin contact to list
+    function addRecycleBinContactToList(contact) {
+        const li = document.createElement('li');
+        li.textContent = `${contact.name} - ${contact.phone} - ${contact.email}`;
+
+        const restoreButton = document.createElement('button');
+        restoreButton.textContent = 'Restore';
+        restoreButton.onclick = () => restoreContact(contact._id);
+
+        const hardDeleteButton = document.createElement('button');
+        hardDeleteButton.textContent = 'Delete Permanently';
+        hardDeleteButton.onclick = () => hardDeleteContact(contact._id);
+
+        li.appendChild(restoreButton);
+        li.appendChild(hardDeleteButton);
+        recycleBinList.appendChild(li);
+    }
+
+    // Restore contact from recycle bin
+    const restoreContact = async (id) => {
+        try {
+            const response = await fetch(`http://localhost:5000/api/contacts/restore/${id}`, {
+                method: 'PUT'
+            });
+            if (!response.ok) {
+                throw new Error('Failed to restore contact');
+            }
+            fetchContacts(); // Refresh contact list after restore
+            fetchRecycleBinContacts(); // Refresh recycle bin list after restore
+            alert('Contact restored successfully');
+        } catch (error) {
+            console.error('Error restoring contact:', error);
+            alert(error.message);
+        }
+    };
 
     // Edit contact functionality
     function editContact(contact) {
@@ -99,9 +194,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         throw new Error(errorData.message || 'Failed to update contact');
                     }
 
-                    const data = await response.json();
-                    updateContactInList(data.contact);
                     alert('Contact updated successfully!');
+                    fetchContacts(); // Refresh contact list after update
                 } else {
                     // Add new contact
                     response = await fetch('http://localhost:5000/api/contacts', {
@@ -117,9 +211,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         throw new Error(errorData.message || 'Failed to create contact');
                     }
 
-                    const data = await response.json();
-                    addContactToList(data.contact);
                     alert('Contact added successfully!');
+                    fetchContacts(); // Refresh contact list after new contact
                 }
 
                 contactForm.reset();
@@ -142,9 +235,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 if (data.contacts && Array.isArray(data.contacts)) {
                     contactList.innerHTML = '';
-
                     data.contacts.forEach(contact => {
-                        addContactToList(contact);
+                        if (!contact.deleted) { // Only show non-deleted contacts
+                            addContactToList(contact);
+                        }
                     });
                 } else {
                     throw new Error('Expected an array of contacts');
@@ -170,8 +264,11 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Fetch the initial contact list if on the contact list page
-    if (contactList) {
-        fetchContacts();
+    // View recycle bin functionality
+    if (viewRecycleBinButton) {
+        viewRecycleBinButton.addEventListener('click', fetchRecycleBinContacts);
     }
+
+    // Initial contact fetch
+    fetchContacts();
 });

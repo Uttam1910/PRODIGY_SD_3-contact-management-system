@@ -194,3 +194,21 @@ h1 {
     font-weight: bold;
     color: #333;
 }
+
+h1 {
+    text-align: center;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+li {
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+}
+
+button {
+    margin-left: 10px;
+}
