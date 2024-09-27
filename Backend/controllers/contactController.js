@@ -135,3 +135,31 @@ exports.searchContacts = async (req, res) => {
     res.status(500).json({ message: 'Error searching contacts', error: error.message });
   }
 };
+
+exports.getRecycleBin = async (req, res) => {
+  try {
+    const deletedContacts = await Contact.find({ deleted: true });
+    res.status(200).json({
+      message: "Deleted contacts fetched successfully",
+      contacts: deletedContacts
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching deleted contacts', error: error.message });
+  }
+};
+
+exports.restoreContact = async (req, res) => {
+  try {
+    const contact = await Contact.findById(req.params.id);
+    if (!contact || !contact.deleted) {
+      return res.status(404).json({ message: 'Contact not found or not deleted' });
+    }
+
+    contact.deleted = false;
+    contact.deletedAt = null;  // Reset the deletion timestamp
+    await contact.save();
+    res.status(200).json({ message: 'Contact restored successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error restoring contact', error: error.message });
+  }
+};

@@ -1,5 +1,5 @@
 const express = require('express');
-const { createContact, getContacts, getContactById, updateContact, deleteContact, searchContacts, softDeleteContact } = require('../controllers/contactController');
+const { createContact, getContacts, getContactById, updateContact, deleteContact, searchContacts, softDeleteContact, getRecycleBin, restoreContact } = require('../controllers/contactController');
 const { validateContact } = require('../middleware/validateContact');
 const router = express.Router();
 
@@ -23,5 +23,11 @@ router.patch('/soft-delete/:id', softDeleteContact);
 
 // Route for hard deleting a contact
 router.delete('/:id', deleteContact);
+
+// Get recycle bin
+router.get('/recycle-bin', getRecycleBin);
+
+// Restore contact
+router.patch('/restore/:id', restoreContact);
 
 module.exports = router;

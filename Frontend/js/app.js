@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Hard delete contact
     const hardDeleteContact = async (id) => {
         try {
-            const response = await fetch(`http://localhost:5000/api/contacts/harddelete/${id}`, {
+            const response = await fetch(`http://localhost:5000/api/contacts/${id}`, {
                 method: 'DELETE'
             });
             if (!response.ok) {
