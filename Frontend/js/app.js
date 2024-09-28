@@ -10,10 +10,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const viewRecycleBinButton = document.getElementById('viewRecycleBin');
 
     // Check if elements exist
-    if (!contactList || !recycleBinList || !searchButton || !prevButton || !nextButton || !pageInfo || !viewRecycleBinButton) {
-        console.error('One or more required DOM elements are missing.');
-        return; // Exit the function if any element is not found
-    }
+    // if (!contactList || !recycleBinList || !searchButton || !prevButton || !nextButton || !pageInfo || !viewRecycleBinButton) {
+    //     console.error('One or more required DOM elements are missing.');
+    //     return; // Exit the function if any element is not found
+    // }
 
     let currentPage = 1;
     const limit = 10;

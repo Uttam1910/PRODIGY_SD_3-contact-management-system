@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recycle Bin</title>
-    <link rel="stylesheet" href="css/styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recycle Bin</title>
+  <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+    <!-- Navbar -->
     <header>
         <nav class="navbar">
             <ul>
@@ -17,10 +18,117 @@
             </ul>
         </nav>
     </header>
-    <h1>Recycle Bin</h1>
-    <ul id="recycleBinList"></ul>
- 
-    
-    <script src="js/app.js"></script>
+
+    <div class="container">
+        <h1>Recycle Bin</h1>
+        <table id="deletedContactsTable">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="deletedContacts"></tbody>
+        </table>
+        <div class="pagination">
+            <button id="prevPage">Previous</button>
+            <button id="nextPage">Next</button>
+        </div>
+        <p id="message"></p>
+    </div>
+
+    <script>
+        let page = 1;
+        const limit = 10;
+
+        async function fetchDeletedContacts() {
+            try {
+                const response = await fetch(`http://localhost:5000/api/contacts/recycle-bin?page=${page}&limit=${limit}`);
+                const result = await response.json();
+
+                if (response.ok) {
+                    displayDeletedContacts(result.contacts);
+                } else {
+                    document.getElementById('message').textContent = result.message;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('message').textContent = 'Failed to fetch deleted contacts.';
+            }
+        }
+
+        function displayDeletedContacts(contacts) {
+            const deletedContactsBody = document.getElementById('deletedContacts');
+            deletedContactsBody.innerHTML = '';
+
+            contacts.forEach(contact => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${contact.name}</td>
+                    <td>${contact.phone}</td>
+                    <td>${contact.email}</td>
+                    <td>
+                        <button class="btn-restore" onclick="restoreContact('${contact._id}')">Restore</button>
+                        <button class="btn-delete" onclick="hardDeleteContact('${contact._id}')">Hard Delete</button>
+                    </td>
+                `;
+                deletedContactsBody.appendChild(row);
+            });
+        }
+
+        async function restoreContact(id) {
+            try {
+                const response = await fetch(`http://localhost:5000/api/contacts/restore/${id}`, {
+                    method: 'PATCH'
+                });
+                const result = await response.json();
+
+                if (response.ok) {
+                    document.getElementById('message').textContent = result.message;
+                    fetchDeletedContacts();
+                } else {
+                    document.getElementById('message').textContent = result.message;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('message').textContent = 'Failed to restore contact.';
+            }
+        }
+
+        async function hardDeleteContact(id) {
+            try {
+                const response = await fetch(`http://localhost:5000/api/contacts/${id}`, {
+                    method: 'DELETE'
+                });
+                const result = await response.json();
+
+                if (response.ok) {
+                    document.getElementById('message').textContent = result.message;
+                    fetchDeletedContacts();
+                } else {
+                    document.getElementById('message').textContent = result.message;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('message').textContent = 'Failed to hard delete contact.';
+            }
+        }
+
+        document.getElementById('prevPage').addEventListener('click', () => {
+            if (page > 1) {
+                page--;
+                fetchDeletedContacts();
+            }
+        });
+
+        document.getElementById('nextPage').addEventListener('click', () => {
+            page++;
+            fetchDeletedContacts();
+        });
+
+        fetchDeletedContacts();
+    </script>
 </body>
 </html>

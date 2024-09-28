@@ -1,35 +1,117 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact List</title>
-    <link rel="stylesheet" href="css/styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact List</title>
+  <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-        <!-- Navbar -->
-        <header>
-            <nav class="navbar">
-                <ul>
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="add-contact.html">Add Contact</a></li>
-                    <li><a href="contacts-list.html">Contacts List</a></li>
-                    <li><a href="recycle-bin.html">Recycle Bin</a></li>
-                </ul>
-            </nav>
-        </header>
-    <h1>Contact List</h1>
+    <!-- Navbar -->
+    <header>
+        <nav class="navbar">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="add-contact.html">Add Contact</a></li>
+                <li><a href="contacts-list.html">Contacts List</a></li>
+                <li><a href="recycle-bin.html">Recycle Bin</a></li>
+            </ul>
+        </nav>
+    </header>
 
-    <!-- Contact List -->
-    <ul id="contactList"></ul>
-
-    <!-- Pagination Controls -->
-    <div class="pagination">
-        <button id="prevButton">Previous</button>
-        <span id="pageInfo"></span>
-        <button id="nextButton">Next</button>
+    <div class="container">
+        <h1>All Contacts</h1>
+        <table id="contactsTable">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="contacts"></tbody>
+        </table>
+        <div class="pagination">
+            <button id="prevPage">Previous Page</button>
+            <button id="nextPage">Next Page</button>
+        </div>
+        <p id="message"></p>
     </div>
 
-    <script src="js/app.js"></script>
+    <script>
+      let page = 1;
+      const limit = 10;
+
+      // Fetch contacts from the server
+      async function fetchContacts() {
+        try {
+          const response = await fetch(`http://localhost:5000/api/contacts?page=${page}&limit=${limit}`);
+          const result = await response.json();
+
+          if (response.ok) {
+            displayContacts(result.contacts);
+          } else {
+            document.getElementById('message').textContent = result.message;
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          document.getElementById('message').textContent = 'Failed to fetch contacts.';
+        }
+      }
+
+      // Display contacts in the table
+      function displayContacts(contacts) {
+        const contactsBody = document.getElementById('contacts');
+        contactsBody.innerHTML = '';
+
+        contacts.forEach(contact => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${contact.name}</td>
+            <td>${contact.phone}</td>
+            <td>${contact.email}</td>
+            <td><button class="btn-delete" onclick="softDeleteContact('${contact._id}')">Soft Delete</button></td>
+          `;
+          contactsBody.appendChild(row);
+        });
+      }
+
+      // Soft delete contact
+      async function softDeleteContact(id) {
+        try {
+          const response = await fetch(`http://localhost:5000/api/contacts/soft-delete/${id}`, {
+            method: 'PATCH'
+          });
+          const result = await response.json();
+
+          if (response.ok) {
+            document.getElementById('message').textContent = result.message;
+            fetchContacts();
+          } else {
+            document.getElementById('message').textContent = result.message;
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          document.getElementById('message').textContent = 'Failed to soft delete contact.';
+        }
+      }
+
+      // Pagination
+      document.getElementById('prevPage').addEventListener('click', () => {
+        if (page > 1) {
+          page--;
+          fetchContacts();
+        }
+      });
+
+      document.getElementById('nextPage').addEventListener('click', () => {
+        page++;
+        fetchContacts();
+      });
+
+      // Initial fetch
+      fetchContacts();
+    </script>
 </body>
 </html>
