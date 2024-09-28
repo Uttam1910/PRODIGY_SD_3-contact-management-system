@@ -1,17 +1,24 @@
 document.addEventListener('DOMContentLoaded', function () {
     const contactForm = document.getElementById('contactForm');
     const contactList = document.getElementById('contactList');
-    const recycleBinList = document.getElementById('recycleBinList'); // Recycle bin element
+    const recycleBinList = document.getElementById('recycleBinList');
     const searchButton = document.getElementById('searchButton');
     const searchInput = document.getElementById('search');
     const prevButton = document.getElementById('prevButton');
     const nextButton = document.getElementById('nextButton');
     const pageInfo = document.getElementById('pageInfo');
-    const viewRecycleBinButton = document.getElementById('viewRecycleBin'); // View Recycle Bin Button
+    const viewRecycleBinButton = document.getElementById('viewRecycleBin');
+
+    // Check if elements exist
+    if (!contactList || !recycleBinList || !searchButton || !prevButton || !nextButton || !pageInfo || !viewRecycleBinButton) {
+        console.error('One or more required DOM elements are missing.');
+        return; // Exit the function if any element is not found
+    }
 
     let currentPage = 1;
     const limit = 10;
     let editingContactId = null;
+    let inRecycleBin = false;
 
     // Fetch contacts
     const fetchContacts = async () => {
@@ -24,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             contactList.innerHTML = '';
             contacts.forEach(contact => {
-                if (!contact.deleted) { // Only show non-deleted contacts in the main list
+                if (!contact.deleted) {
                     addContactToList(contact);
                 }
             });
@@ -54,13 +61,8 @@ document.addEventListener('DOMContentLoaded', function () {
         softDeleteButton.textContent = 'Soft Delete';
         softDeleteButton.onclick = () => softDeleteContact(contact._id);
 
-        const hardDeleteButton = document.createElement('button');
-        hardDeleteButton.textContent = 'Hard Delete';
-        hardDeleteButton.onclick = () => hardDeleteContact(contact._id);
-
         li.appendChild(editButton);
         li.appendChild(softDeleteButton);
-        li.appendChild(hardDeleteButton);
         contactList.appendChild(li);
     }
 
@@ -68,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const softDeleteContact = async (id) => {
         try {
             const response = await fetch(`http://localhost:5000/api/contacts/${id}`, {
-                method: 'DELETE'
+                method: 'PUT' // Changed to PUT to mark as deleted
             });
             if (!response.ok) {
                 throw new Error('Failed to soft delete contact');
@@ -84,7 +86,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Hard delete contact
     const hardDeleteContact = async (id) => {
         try {
-            const response = await fetch(`http://localhost:5000/api/contacts/${id}`, {
+            const response = await fetch(`http://localhost:5000/api/contacts/${id}/harddelete`, {
                 method: 'DELETE'
             });
             if (!response.ok) {
@@ -141,7 +143,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const restoreContact = async (id) => {
         try {
             const response = await fetch(`http://localhost:5000/api/contacts/restore/${id}`, {
-                method: 'PUT'
+                method: 'PUT' // Ensure you have this endpoint set up correctly
             });
             if (!response.ok) {
                 throw new Error('Failed to restore contact');
@@ -216,7 +218,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
 
                 contactForm.reset();
-                editingContactId = null;
+                editingContactId = null; // Reset editing ID
             } catch (error) {
                 console.error('Error creating/updating contact:', error);
                 alert(error.message);
@@ -240,8 +242,6 @@ document.addEventListener('DOMContentLoaded', function () {
                             addContactToList(contact);
                         }
                     });
-                } else {
-                    throw new Error('Expected an array of contacts');
                 }
             } catch (error) {
                 console.error('Error searching contacts:', error);
@@ -250,25 +250,36 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Pagination controls
-    if (prevButton && nextButton) {
+    if (prevButton) {
         prevButton.addEventListener('click', () => {
             if (currentPage > 1) {
                 currentPage--;
                 fetchContacts();
             }
         });
+    }
 
+    if (nextButton) {
         nextButton.addEventListener('click', () => {
             currentPage++;
             fetchContacts();
         });
     }
 
-    // View recycle bin functionality
+    // Toggle recycle bin view
     if (viewRecycleBinButton) {
-        viewRecycleBinButton.addEventListener('click', fetchRecycleBinContacts);
+        viewRecycleBinButton.addEventListener('click', () => {
+            inRecycleBin = !inRecycleBin;
+            contactList.style.display = inRecycleBin ? 'none' : 'block';
+            recycleBinList.style.display = inRecycleBin ? 'block' : 'none';
+            if (inRecycleBin) {
+                fetchRecycleBinContacts(); // Fetch recycle bin contacts
+            } else {
+                fetchContacts(); // Fetch main contacts
+            }
+            viewRecycleBinButton.textContent = inRecycleBin ? 'View Contacts' : 'View Recycle Bin';
+        });
     }
 
-    // Initial contact fetch
-    fetchContacts();
+    fetchContacts(); // Initial fetch of contacts
 });
