@@ -9,12 +9,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const pageInfo = document.getElementById('pageInfo');
     const viewRecycleBinButton = document.getElementById('viewRecycleBin');
 
-    // Check if elements exist
-    // if (!contactList || !recycleBinList || !searchButton || !prevButton || !nextButton || !pageInfo || !viewRecycleBinButton) {
-    //     console.error('One or more required DOM elements are missing.');
-    //     return; // Exit the function if any element is not found
-    // }
-
     let currentPage = 1;
     const limit = 10;
     let editingContactId = null;
@@ -52,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function addContactToList(contact) {
         const li = document.createElement('li');
         li.textContent = `${contact.name} - ${contact.phone} - ${contact.email}`;
-        
+
         const editButton = document.createElement('button');
         editButton.textContent = 'Edit';
         editButton.onclick = () => editContact(contact);
@@ -197,7 +191,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
 
                     alert('Contact updated successfully!');
-                    fetchContacts(); // Refresh contact list after update
+                    editingContactId = null; // Reset editing ID
                 } else {
                     // Add new contact
                     response = await fetch('http://localhost:5000/api/contacts', {
@@ -214,11 +208,10 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
 
                     alert('Contact added successfully!');
-                    fetchContacts(); // Refresh contact list after new contact
                 }
 
-                contactForm.reset();
-                editingContactId = null; // Reset editing ID
+                fetchContacts(); // Refresh contact list after add/update
+                contactForm.reset(); // Reset the form
             } catch (error) {
                 console.error('Error creating/updating contact:', error);
                 alert(error.message);
@@ -233,53 +226,44 @@ document.addEventListener('DOMContentLoaded', function () {
 
             try {
                 const response = await fetch(`http://localhost:5000/api/contacts/search?name=${searchValue}`);
-                const data = await response.json();
+                if (!response.ok) throw new Error('Failed to search contacts');
 
-                if (data.contacts && Array.isArray(data.contacts)) {
-                    contactList.innerHTML = '';
-                    data.contacts.forEach(contact => {
-                        if (!contact.deleted) { // Only show non-deleted contacts
-                            addContactToList(contact);
-                        }
-                    });
-                }
+                const data = await response.json();
+                const contacts = data.contacts;
+
+                contactList.innerHTML = '';
+                contacts.forEach(contact => {
+                    if (!contact.deleted) {
+                        addContactToList(contact);
+                    }
+                });
             } catch (error) {
                 console.error('Error searching contacts:', error);
             }
         });
     }
 
-    // Pagination controls
-    if (prevButton) {
-        prevButton.addEventListener('click', () => {
-            if (currentPage > 1) {
-                currentPage--;
-                fetchContacts();
-            }
-        });
-    }
-
-    if (nextButton) {
-        nextButton.addEventListener('click', () => {
-            currentPage++;
+    // Pagination
+    prevButton.addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage--;
             fetchContacts();
-        });
-    }
+        }
+    });
 
-    // Toggle recycle bin view
-    if (viewRecycleBinButton) {
-        viewRecycleBinButton.addEventListener('click', () => {
-            inRecycleBin = !inRecycleBin;
-            contactList.style.display = inRecycleBin ? 'none' : 'block';
-            recycleBinList.style.display = inRecycleBin ? 'block' : 'none';
-            if (inRecycleBin) {
-                fetchRecycleBinContacts(); // Fetch recycle bin contacts
-            } else {
-                fetchContacts(); // Fetch main contacts
-            }
-            viewRecycleBinButton.textContent = inRecycleBin ? 'View Contacts' : 'View Recycle Bin';
-        });
-    }
+    nextButton.addEventListener('click', () => {
+        currentPage++;
+        fetchContacts();
+    });
 
-    fetchContacts(); // Initial fetch of contacts
+    // View recycle bin
+    viewRecycleBinButton.addEventListener('click', () => {
+        inRecycleBin = !inRecycleBin;
+        recycleBinList.style.display = inRecycleBin ? 'block' : 'none';
+        viewRecycleBinButton.textContent = inRecycleBin ? 'Hide Recycle Bin' : 'View Recycle Bin';
+        if (inRecycleBin) fetchRecycleBinContacts();
+    });
+
+    // Initial fetch
+    fetchContacts();
 });

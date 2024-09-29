@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Contact</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <!-- Navbar -->
+  <header>
+      <nav class="navbar">
+          <ul>
+              <li><a href="index.html">Home</a></li>
+              <li><a href="add-contact.html">Add Contact</a></li>
+              <li><a href="contacts-list.html">Contacts List</a></li>
+              <li><a href="recycle-bin.html">Recycle Bin</a></li>
+          </ul>
+      </nav>
+  </header>
+
+  <div class="container">
+      <h1>Edit Contact</h1>
+      <form id="contactForm">
+          <input type="text" id="name" placeholder="Name" required />
+          <input type="text" id="phone" placeholder="Phone" required />
+          <input type="email" id="email" placeholder="Email" required />
+          <button type="submit">Update Contact</button>
+      </form>
+      <div id="message" class="message"></div>
+  </div>
+
+  <script>
+      const params = new URLSearchParams(window.location.search);
+      const contactId = params.get('id');
+
+      // Fetch existing contact details
+      const fetchContact = async () => {
+          try {
+              const response = await fetch(`http://localhost:5000/api/contacts/${contactId}`);
+              const data = await response.json();
+
+              if (data.contact) {
+                  document.getElementById('name').value = data.contact.name;
+                  document.getElementById('phone').value = data.contact.phone;
+                  document.getElementById('email').value = data.contact.email;
+              } else {
+                  document.getElementById('message').innerText = 'Contact not found';
+              }
+          } catch (error) {
+              document.getElementById('message').innerText = 'Error fetching contact details';
+          }
+      };
+
+      // Handle form submission for updating the contact
+      const updateContact = async (event) => {
+          event.preventDefault();
+
+          const name = document.getElementById('name').value;
+          const phone = document.getElementById('phone').value;
+          const email = document.getElementById('email').value;
+
+          try {
+              const response = await fetch(`http://localhost:5000/api/contacts/${contactId}`, {
+                  method: 'PUT',
+                  headers: {
+                      'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({ name, phone, email }),
+              });
+
+              const result = await response.json();
+
+              if (response.ok) {
+                  document.getElementById('message').innerText = result.message;
+
+                  // Redirect to the contacts list after a successful update
+                  setTimeout(() => {
+                      window.location.href = 'contacts-list.html';
+                  }, 1500); // Redirect after 1.5 seconds
+              } else {
+                  document.getElementById('message').innerText = 'Error updating contact: ' + result.message;
+              }
+          } catch (error) {
+              document.getElementById('message').innerText = 'Error updating contact';
+          }
+      };
+
+      // Attach event listener
+      document.getElementById('contactForm').addEventListener('submit', updateContact);
+
+      // Fetch the contact details when the page loads
+      fetchContact();
+  </script>
+</body>
+</html>

@@ -71,7 +71,10 @@
             <td>${contact.name}</td>
             <td>${contact.phone}</td>
             <td>${contact.email}</td>
-            <td><button class="btn-delete" onclick="softDeleteContact('${contact._id}')">Soft Delete</button></td>
+            <td>
+              <button class="btn-edit" onclick="editContact('${contact._id}')">Edit</button>
+              <button class="btn-delete" onclick="softDeleteContact('${contact._id}')">Soft Delete</button>
+            </td>
           `;
           contactsBody.appendChild(row);
         });
@@ -95,6 +98,12 @@
           console.error('Error:', error);
           document.getElementById('message').textContent = 'Failed to soft delete contact.';
         }
+      }
+
+      // Edit contact function
+      function editContact(id) {
+        // Redirect to edit contact page with the contact ID
+        window.location.href = `edit-contact.html?id=${id}`;
       }
 
       // Pagination

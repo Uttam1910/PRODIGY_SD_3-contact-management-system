@@ -52,6 +52,11 @@
                 if (response.ok) {
                     document.getElementById('message').textContent = result.message;
                     document.getElementById('message').classList.add('success');
+
+                    // Redirect to the contacts list after a successful addition
+                    setTimeout(() => {
+                        window.location.href = 'contacts-list.html';
+                    }, 1500); // Redirect after 1.5 seconds
                 } else {
                     document.getElementById('message').textContent = result.message;
                     document.getElementById('message').classList.add('error');
